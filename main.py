@@ -32,9 +32,19 @@ def main():
 
     contador_fallos_api = 0
 
+    if not config.API_DISPONIBLE:
+        logger.warning(
+            "Modo scraping únicamente (API no configurada). "
+            "Establece TICKETMASTER_API_KEY y TICKETMASTER_EVENT_ID "
+            "en .env para activar el modo híbrido."
+        )
+
     while True:
         try:
-            if contador_fallos_api < config.MAX_API_FAILURES:
+            if (
+                config.API_DISPONIBLE
+                and contador_fallos_api < config.MAX_API_FAILURES
+            ):
                 exito, hay_boletas = verificar_estado_api()
 
                 if exito:
@@ -56,10 +66,13 @@ def main():
                 time.sleep(config.API_DELAY)
 
             else:
-                logger.warning(
-                    "Cambiando a sistema de respaldo (scraping) tras %s fallos",
-                    contador_fallos_api,
-                )
+                if config.API_DISPONIBLE:
+                    logger.warning(
+                        "Failover: cambiando a scraping tras %s fallos de API",
+                        contador_fallos_api,
+                    )
+                else:
+                    logger.info("Usando scraping como modo principal")
 
                 exito, hay_boletas = verificar_estado_scraping()
 

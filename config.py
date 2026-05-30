@@ -16,6 +16,9 @@ TELEGRAM_CHAT_ID: str | None = os.getenv("TELEGRAM_CHAT_ID")
 TICKETMASTER_API_KEY: str | None = os.getenv("TICKETMASTER_API_KEY")
 TICKETMASTER_EVENT_ID: str | None = os.getenv("TICKETMASTER_EVENT_ID")
 
+# === Flags de disponibilidad ===
+API_DISPONIBLE: bool = bool(TICKETMASTER_API_KEY and TICKETMASTER_EVENT_ID)
+
 # === Constantes estáticas de configuración ===
 API_BASE_URL: str = "https://app.ticketmaster.com/discovery/v2/events/"
 EVENT_URL_SCRAPING: str = "https://www.ticketmaster.co/event/bts-world-tour-2026"

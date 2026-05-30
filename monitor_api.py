@@ -20,10 +20,20 @@ def verificar_estado_api() -> tuple[bool, bool]:
     """
     Consulta el estado del evento en la API de Ticketmaster.
 
+    Si no hay API key o eventId configurados, retorna (True, False)
+    para que el orquestador continúe sin marcar fallos.
+
     Retorna:
         (exito_de_peticion, hay_nuevas_boletas)
     """
     global ultimo_estado
+
+    if not config.API_DISPONIBLE:
+        logger.warning(
+            "API no configurada (faltan TICKETMASTER_API_KEY o "
+            "TICKETMASTER_EVENT_ID). Saltando fase API."
+        )
+        return (True, False)
 
     url = (
         f"{config.API_BASE_URL}"
