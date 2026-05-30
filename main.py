@@ -83,6 +83,7 @@ def main():
                             "🚨 ¡ALERTA SCRAPER! Posibles boletas disponibles "
                             "para BTS. Entra ya: " + config.EVENT_URL_SCRAPING
                         )
+                    time.sleep(config.API_DELAY)
                 else:
                     logger.error("Ambos sistemas de monitoreo fallaron")
                     enviar_alerta(
