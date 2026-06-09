@@ -24,16 +24,21 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-def enviar_alerta(mensaje: str) -> bool:
+def enviar_alerta(mensaje: str, chat_id: str | None = None) -> bool:
     """
     Envía un mensaje de alerta a Telegram vía Bot API.
 
     Implementa reintentos con backoff exponencial (2^intento segundos).
     Retorna True si se envió con éxito, False si fallaron todos los intentos.
     """
+    chat_id = chat_id or config.TELEGRAM_CHAT_ID
+    if not chat_id:
+        logger.warning("Telegram chat_id no configurado")
+        return False
+
     url = f"https://api.telegram.org/bot{config.TELEGRAM_TOKEN}/sendMessage"
     payload = {
-        "chat_id": config.TELEGRAM_CHAT_ID,
+        "chat_id": chat_id,
         "text": mensaje,
     }
 

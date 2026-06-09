@@ -1,0 +1,26 @@
+[
+    {
+        "nombre": "Cliente Demo",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/bts-world-tour-2026",
+        "telegram_chat_id": "5511840629",
+        "whatsapp_chat_id": "573057384704@c.us",
+        "habilitado": true
+    },
+    {
+        "nombre": "Ejemplo API - Balloon Museum Miami",
+        "evento_id": "vvG1VZ_adKx29S",
+        "url_scraping": "",
+        "telegram_chat_id": "5511840629",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Ejemplo Solo Telegram",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/ejemplo",
+        "telegram_chat_id": "5511840629",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    }
+]
