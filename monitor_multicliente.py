@@ -1,18 +1,45 @@
 import json
 import logging
+import random
 import time
 
 import requests
 
 import config
-from monitor_api import verificar_estado_api as _check_api
-from monitor_scraping import verificar_estado_scraping as _check_scraping
 from notificador import enviar_alerta
 from reporte_wa import enviar_reporte_wa
 
 logger = logging.getLogger(__name__)
 
 RUTA_CLIENTES = "clientes.json"
+
+PALABRAS_AGOTADO = [
+    "agotado", "sold out", "no tickets", "entradas agotadas",
+    "no hay entradas", "no disponible", "evento finalizado",
+]
+PALABRAS_DISPONIBLE = [
+    "comprar", "get tickets", "buy tickets", "boletas",
+    "ver boletas", "encuentra tus boletas", "elige tu",
+    "precios", "mapa", "ubicacion",
+]
+SELECTORES_DISPONIBLE = [
+    "button:has-text('Comprar')",
+    "button:has-text('Get Tickets')",
+    "button:has-text('Buy')",
+    "button:has-text('Ver boletas')",
+    "button:has-text('Boletas')",
+    "button:has-text('Continuar')",
+    "[data-testid='buy-tickets-button']",
+    "[data-automation='buy-tickets-button']",
+    "a:has-text('Comprar')",
+    "a:has-text('Get Tickets')",
+]
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+]
 
 
 class MonitorCliente:
@@ -23,11 +50,13 @@ class MonitorCliente:
         self.telegram_chat_id = cfg.get("telegram_chat_id") or None
         self.whatsapp_chat_id = cfg.get("whatsapp_chat_id") or None
         self.habilitado = cfg.get("habilitado", True)
+        self.alertar_inicial = cfg.get("alertar_inicial", False)
 
         self.api_disponible = bool(config.TICKETMASTER_API_KEY and self.evento_id)
         self._ultimo_estado_api: str | None = None
         self._ultimo_estado_scraping: str | None = None
         self._contador_fallos_api = 0
+        self._primer_ciclo = True
 
     def verificar_api(self) -> tuple[bool, bool]:
         if not self.api_disponible:
@@ -57,9 +86,9 @@ class MonitorCliente:
 
                 if self._ultimo_estado_api is None:
                     self._ultimo_estado_api = estado
-                    logger.info(
-                        "[%s] Estado inicial API: %s", self.nombre, estado
-                    )
+                    logger.info("[%s] Estado inicial API: %s", self.nombre, estado)
+                    if estado == "onsale" and self.alertar_inicial:
+                        return (True, True)
                 return (True, False)
 
             if r.status_code in (429, 401, 403):
@@ -68,6 +97,60 @@ class MonitorCliente:
 
         except requests.exceptions.RequestException:
             return (False, False)
+
+    def _aceptar_cookies(self, page):
+        selectores_cookies = [
+            "button:has-text('Aceptar')",
+            "button:has-text('Accept')",
+            "button:has-text('Aceptar todo')",
+            "button:has-text('Accept all')",
+            "button:has-text('Continuar')",
+            "#onetrust-accept-btn-handler",
+            ".cookie-accept",
+            "[aria-label='Accept cookies']",
+        ]
+        for sel in selectores_cookies:
+            try:
+                btn = page.locator(sel)
+                if btn.count() > 0 and btn.first.is_visible(timeout=2000):
+                    btn.first.click()
+                    page.wait_for_timeout(1000)
+                    logger.info("[%s] Cookies aceptadas via '%s'", self.nombre, sel)
+                    return
+            except Exception:
+                continue
+
+    def _analizar_disponibilidad_scraping(self, page) -> tuple[bool, str]:
+        """
+        Retorna (disponible, razon).
+        Usa multiples indicadores: selectores de compra, texto, botones.
+        """
+        self._aceptar_cookies(page)
+        page.wait_for_timeout(random.uniform(3000, 5000))
+
+        body_text = page.locator("body").inner_text(timeout=10_000).lower()
+
+        for kw in PALABRAS_AGOTADO:
+            if kw in body_text:
+                logger.info("[%s] Texto agotado detectado: '%s'", self.nombre, kw)
+                return (False, f"texto_agotado:'{kw}'")
+
+        for selector in SELECTORES_DISPONIBLE:
+            try:
+                el = page.locator(selector)
+                if el.count() > 0 and el.first.is_visible(timeout=2000):
+                    logger.info("[%s] Selector compra visible: '%s'", self.nombre, selector)
+                    return (True, f"selector:'{selector}'")
+            except Exception:
+                continue
+
+        for kw in PALABRAS_DISPONIBLE:
+            if kw in body_text:
+                logger.info("[%s] Texto disponible detectado: '%s'", self.nombre, kw)
+                return (True, f"texto_disponible:'{kw}'")
+
+        logger.info("[%s] Sin indicadores positivos en pagina", self.nombre)
+        return (False, "sin_indicadores_positivos")
 
     def verificar_scraping(self) -> tuple[bool, bool]:
         if not self.url_scraping:
@@ -85,43 +168,35 @@ class MonitorCliente:
                     ],
                 )
                 ctx = nav.new_context(
-                    user_agent=(
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                        "AppleWebKit/537.36 (KHTML, like Gecko) "
-                        "Chrome/120.0.0.0 Safari/537.36"
-                    ),
+                    user_agent=random.choice(USER_AGENTS),
                     viewport={"width": 1920, "height": 1080},
                 )
                 page = ctx.new_page()
                 logger.info("[%s] Scraping %s ...", self.nombre, self.url_scraping)
-                page.goto(self.url_scraping, timeout=30_000)
-                time.sleep(3)
+                page.goto(self.url_scraping, timeout=30_000, wait_until="networkidle")
 
-                body = page.locator("body").inner_text(timeout=10_000).lower()
+                disponible, razon = self._analizar_disponibilidad_scraping(page)
                 nav.close()
 
-            agotado_kw = ["agotado", "sold out", "no tickets available"]
-            agotado = any(k in body for k in agotado_kw)
+            estado = "disponible" if disponible else "agotado"
 
-            if not agotado:
-                estado = "disponible"
-                if (
-                    self._ultimo_estado_scraping is not None
-                    and self._ultimo_estado_scraping != estado
-                ):
-                    self._ultimo_estado_scraping = estado
-                    return (True, True)
-
-                if self._ultimo_estado_scraping is None:
-                    self._ultimo_estado_scraping = estado
-                    logger.info("[%s] Estado inicial scraping: disponible", self.nombre)
-                return (True, False)
+            if self._ultimo_estado_scraping is not None and self._ultimo_estado_scraping != estado:
+                if disponible:
+                    logger.info(
+                        "[%s] Cambio detectado! agotado -> disponible (por %s)",
+                        self.nombre, razon,
+                    )
+                self._ultimo_estado_scraping = estado
+                return (True, disponible)
 
             if self._ultimo_estado_scraping is None:
-                self._ultimo_estado_scraping = "agotado"
-                logger.info("[%s] Estado inicial scraping: agotado", self.nombre)
-            elif self._ultimo_estado_scraping != "agotado":
-                self._ultimo_estado_scraping = "agotado"
+                self._ultimo_estado_scraping = estado
+                logger.info(
+                    "[%s] Estado inicial scraping: %s (por %s)",
+                    self.nombre, estado, razon,
+                )
+                if disponible and self.alertar_inicial:
+                    return (True, True)
 
             return (True, False)
 

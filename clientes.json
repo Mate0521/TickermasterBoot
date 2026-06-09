@@ -5,7 +5,53 @@
         "url_scraping": "https://www.ticketmaster.co/event/bts-world-tour-2026",
         "telegram_chat_id": "5511840629",
         "whatsapp_chat_id": "573057384704@c.us",
-        "habilitado": true
+        "habilitado": true,
+        "alertar_inicial": true
+    },
+    {
+        "nombre": "EDC Medellín 2026",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/edc-2026",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false,
+        "alertar_inicial": true
+    },
+    {
+        "nombre": "Carlos Vives - Pereira 2026",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/carlos-vives-pereira-venta-general",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false,
+        "alertar_inicial": true
+    },
+    {
+        "nombre": "The Juanpis Live Show",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/the-juanpis-live-show-ahora-si",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false,
+        "alertar_inicial": true
+    },
+    {
+        "nombre": "Falxo Tour Bogotá - Feid vs Ferxxo",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/falxo-bog-venta-general",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false,
+        "alertar_inicial": true
+    },
+    {
+        "nombre": "Arjona Medellín 2026",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/arjona-medelln-2026",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "Balloon Museum - Miami 2026",
@@ -13,7 +59,8 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "Elkhart Jazz Festival 2026",
@@ -21,7 +68,8 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "Birmingham Legion FC 2026",
@@ -29,7 +77,8 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "80s Live - Atlantic City 2026",
@@ -37,7 +86,8 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "Seattle Mariners 2026",
@@ -45,7 +95,8 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     },
     {
         "nombre": "MJ Live - Las Vegas 2025",
@@ -53,46 +104,7 @@
         "url_scraping": "",
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
-        "habilitado": false
-    },
-    {
-        "nombre": "EDC Medellín 2026 (Scraping)",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/edc-2026",
-        "telegram_chat_id": "",
-        "whatsapp_chat_id": "",
-        "habilitado": false
-    },
-    {
-        "nombre": "Carlos Vives - Pereira 2026 (Scraping)",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/carlos-vives-pereira-venta-general",
-        "telegram_chat_id": "",
-        "whatsapp_chat_id": "",
-        "habilitado": false
-    },
-    {
-        "nombre": "The Juanpis Live Show (Scraping)",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/the-juanpis-live-show-ahora-si",
-        "telegram_chat_id": "",
-        "whatsapp_chat_id": "",
-        "habilitado": false
-    },
-    {
-        "nombre": "Falxo Tour Bogotá - Feid vs Ferxxo (Scraping)",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/falxo-bog-venta-general",
-        "telegram_chat_id": "",
-        "whatsapp_chat_id": "",
-        "habilitado": false
-    },
-    {
-        "nombre": "Arjona Medellín 2026 (Scraping)",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/arjona-medelln-2026",
-        "telegram_chat_id": "",
-        "whatsapp_chat_id": "",
-        "habilitado": false
+        "habilitado": false,
+        "alertar_inicial": true
     }
 ]
