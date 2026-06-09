@@ -54,5 +54,45 @@
         "telegram_chat_id": "",
         "whatsapp_chat_id": "",
         "habilitado": false
+    },
+    {
+        "nombre": "EDC Medellín 2026 (Scraping)",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/edc-2026",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Carlos Vives - Pereira 2026 (Scraping)",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/carlos-vives-pereira-venta-general",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "The Juanpis Live Show (Scraping)",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/the-juanpis-live-show-ahora-si",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Falxo Tour Bogotá - Feid vs Ferxxo (Scraping)",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/falxo-bog-venta-general",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Arjona Medellín 2026 (Scraping)",
+        "evento_id": "",
+        "url_scraping": "https://www.ticketmaster.co/event/arjona-medelln-2026",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
     }
 ]
