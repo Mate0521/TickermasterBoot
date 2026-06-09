@@ -1,6 +1,6 @@
 [
     {
-        "nombre": "Cliente Demo",
+        "nombre": "Cliente Demo - BTS Scraping",
         "evento_id": "",
         "url_scraping": "https://www.ticketmaster.co/event/bts-world-tour-2026",
         "telegram_chat_id": "5511840629",
@@ -8,18 +8,50 @@
         "habilitado": true
     },
     {
-        "nombre": "Ejemplo API - Balloon Museum Miami",
+        "nombre": "Balloon Museum - Miami 2026",
         "evento_id": "vvG1VZ_adKx29S",
         "url_scraping": "",
-        "telegram_chat_id": "5511840629",
+        "telegram_chat_id": "",
         "whatsapp_chat_id": "",
         "habilitado": false
     },
     {
-        "nombre": "Ejemplo Solo Telegram",
-        "evento_id": "",
-        "url_scraping": "https://www.ticketmaster.co/event/ejemplo",
-        "telegram_chat_id": "5511840629",
+        "nombre": "Elkhart Jazz Festival 2026",
+        "evento_id": "vvG1fZ_G5P-x8a",
+        "url_scraping": "",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Birmingham Legion FC 2026",
+        "evento_id": "1kFZv0-EGAGJ-97",
+        "url_scraping": "",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "80s Live - Atlantic City 2026",
+        "evento_id": "vv17FZ_7GknXLtWZ",
+        "url_scraping": "",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "Seattle Mariners 2026",
+        "evento_id": "vvG1HZbM95d1XR",
+        "url_scraping": "",
+        "telegram_chat_id": "",
+        "whatsapp_chat_id": "",
+        "habilitado": false
+    },
+    {
+        "nombre": "MJ Live - Las Vegas 2025",
+        "evento_id": "1AyZkCaGkeTZ1Y7",
+        "url_scraping": "",
+        "telegram_chat_id": "",
         "whatsapp_chat_id": "",
         "habilitado": false
     }
