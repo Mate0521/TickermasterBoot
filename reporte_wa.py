@@ -28,7 +28,38 @@ def _obtener_session_id() -> str | None:
         return None
 
 
+_fallos_consecutivos = 0
+
+
+def _reconectar_sesion(session_id: str) -> bool:
+    try:
+        headers = {"X-API-Key": config.OPENWA_API_KEY}
+        r = requests.post(
+            f"{config.OPENWA_URL}/sessions/{session_id}/stop",
+            headers=headers, timeout=10,
+        )
+        if r.status_code not in (200, 201):
+            logger.warning("Error al detener sesion: %s", r.status_code)
+            return False
+        time.sleep(3)
+        r2 = requests.post(
+            f"{config.OPENWA_URL}/sessions/{session_id}/start",
+            headers=headers, timeout=10,
+        )
+        if r2.status_code in (200, 201):
+            logger.info("Sesion WhatsApp reconectada exitosamente")
+            _fallos_consecutivos = 0
+            return True
+        logger.warning("Error al iniciar sesion: %s", r2.status_code)
+        return False
+    except Exception as e:
+        logger.warning("Error reconectando sesion: %s", e)
+        return False
+
+
 def enviar_reporte_wa(mensaje: str, chat_id: str | None = None) -> bool:
+    global _fallos_consecutivos
+
     if not config.OPENWA_DISPONIBLE:
         logger.warning("OpenWA no configurado. Salta alerta WhatsApp.")
         return False
@@ -56,6 +87,7 @@ def enviar_reporte_wa(mensaje: str, chat_id: str | None = None) -> bool:
         try:
             response = requests.post(url, json=payload, headers=headers, timeout=15)
             if response.status_code in (200, 201):
+                _fallos_consecutivos = 0
                 logger.info("Reporte enviado correctamente a WhatsApp")
                 return True
 
@@ -65,6 +97,12 @@ def enviar_reporte_wa(mensaje: str, chat_id: str | None = None) -> bool:
                 intento,
                 config.OPENWA_RETRIES,
             )
+
+            if response.status_code >= 500:
+                _fallos_consecutivos += 1
+                if _fallos_consecutivos >= 3:
+                    logger.warning("3+ fallos consecutivos, reconectando sesion...")
+                    _reconectar_sesion(session_id)
 
         except (requests.ConnectionError, requests.Timeout) as e:
             logger.warning(

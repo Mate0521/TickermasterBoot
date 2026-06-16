@@ -41,6 +41,8 @@ USER_AGENTS = [
     "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
 ]
 
+COOLDOWN_ERROR_SEGUNDOS = 300
+
 
 class MonitorCliente:
     def __init__(self, cfg: dict):
@@ -56,7 +58,7 @@ class MonitorCliente:
         self._ultimo_estado_api: str | None = None
         self._ultimo_estado_scraping: str | None = None
         self._contador_fallos_api = 0
-        self._primer_ciclo = True
+        self._ultimo_error_alertado = 0.0
 
     def verificar_api(self) -> tuple[bool, bool]:
         if not self.api_disponible:
@@ -104,7 +106,6 @@ class MonitorCliente:
             "button:has-text('Accept')",
             "button:has-text('Aceptar todo')",
             "button:has-text('Accept all')",
-            "button:has-text('Continuar')",
             "#onetrust-accept-btn-handler",
             ".cookie-accept",
             "[aria-label='Accept cookies']",
@@ -121,10 +122,6 @@ class MonitorCliente:
                 continue
 
     def _analizar_disponibilidad_scraping(self, page) -> tuple[bool, str]:
-        """
-        Retorna (disponible, razon).
-        Usa multiples indicadores: selectores de compra, texto, botones.
-        """
         self._aceptar_cookies(page)
         page.wait_for_timeout(random.uniform(3000, 5000))
 
@@ -173,7 +170,12 @@ class MonitorCliente:
                 )
                 page = ctx.new_page()
                 logger.info("[%s] Scraping %s ...", self.nombre, self.url_scraping)
-                page.goto(self.url_scraping, timeout=30_000, wait_until="networkidle")
+
+                try:
+                    page.goto(self.url_scraping, timeout=25_000, wait_until="load")
+                except Exception:
+                    logger.warning("[%s] Load timeout, fallback a domcontentloaded", self.nombre)
+                    page.goto(self.url_scraping, timeout=15_000, wait_until="domcontentloaded")
 
                 disponible, razon = self._analizar_disponibilidad_scraping(page)
                 nav.close()
@@ -210,12 +212,29 @@ class MonitorCliente:
         if self.whatsapp_chat_id:
             enviar_reporte_wa(mensaje, chat_id=self.whatsapp_chat_id)
 
+    def alertar_error_con_cooldown(self, mensaje: str):
+        ahora = time.time()
+        if ahora - self._ultimo_error_alertado >= COOLDOWN_ERROR_SEGUNDOS:
+            self._ultimo_error_alertado = ahora
+            self.alertar(mensaje)
+
 
 def cargar_clientes() -> list[MonitorCliente]:
     try:
         with open(RUTA_CLIENTES, encoding="utf-8") as f:
             raw = json.load(f)
-        return [MonitorCliente(c) for c in raw if c.get("habilitado", True)]
+        vistos = set()
+        resultado = []
+        for c in raw:
+            if not c.get("habilitado", True):
+                continue
+            nombre = c["nombre"]
+            if nombre in vistos:
+                logger.warning("Cliente duplicado ignorado: '%s'", nombre)
+                continue
+            vistos.add(nombre)
+            resultado.append(MonitorCliente(c))
+        return resultado
     except (FileNotFoundError, json.JSONDecodeError) as e:
         logger.error("Error cargando %s: %s", RUTA_CLIENTES, e)
         return []
@@ -253,7 +272,8 @@ def ejecutar_ciclo(clientes: list[MonitorCliente]):
             )
             cli.alertar(msg)
         elif not exito_s:
-            logger.error("[%s] Fallaron ambos sistemas", cli.nombre)
-            cli.alertar(
-                f"ERROR {cli.nombre}: Ambos sistemas de monitoreo fallaron"
+            logger.error("[%s] Error al consultar scraping", cli.nombre)
+            cli.alertar_error_con_cooldown(
+                f"ERROR {cli.nombre}: No se pudo consultar el evento "
+                f"(timeout o bloqueo). El monitoreo continua."
             )
